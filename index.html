@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Buying Cost Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <h1>Home Buying Cost Calculator</h1>
+            <p>See your true monthly cost of homeownership</p>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- ===== LEFT: INPUTS ===== -->
+        <div class="inputs-col">
+
+            <!-- Location -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Location</h2>
+                </div>
+                <div class="form-group">
+                    <label for="zip">ZIP Code</label>
+                    <div class="zip-row">
+                        <input type="text" id="zip" maxlength="5" placeholder="e.g. 55401" inputmode="numeric">
+                        <button id="zip-btn" onclick="handleZipLookup()">Look Up</button>
+                    </div>
+                    <div id="location-display" class="location-info" style="display:none"></div>
+                    <div id="zip-error" class="field-error" style="display:none"></div>
+                </div>
+            </div>
+
+            <!-- Property Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Property Details</h2>
+                </div>
+
+                <div class="form-group">
+                    <label for="home-value">Home Value</label>
+                    <div class="input-wrap prefix">
+                        <span class="adorn">$</span>
+                        <input type="number" id="home-value" value="400000" min="0" step="1000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Down Payment</label>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" id="dp-pct-btn" onclick="setDPMode('pct')">%</button>
+                        <button class="mode-btn" id="dp-dollar-btn" onclick="setDPMode('dollar')">$</button>
+                    </div>
+                    <div id="dp-pct-wrap" class="input-wrap suffix">
+                        <input type="number" id="dp-pct" value="20" min="0" max="100" step="0.5">
+                        <span class="adorn">%</span>
+                    </div>
+                    <div id="dp-dollar-wrap" class="input-wrap prefix" style="display:none">
+                        <span class="adorn">$</span>
+                        <input type="number" id="dp-dollar" value="80000" min="0" step="1000">
+                    </div>
+                    <div class="dp-preview" id="dp-preview">= $80,000 (20.0%)</div>
+                    <div class="pmi-warning" id="pmi-warning" style="display:none">
+                        ⚠️ Less than 20% down — PMI required
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Mortgage Term</label>
+                    <div class="term-toggle">
+                        <button class="term-btn active" id="term-30-btn" onclick="setTerm(30)">30-Year</button>
+                        <button class="term-btn" id="term-15-btn" onclick="setTerm(15)">15-Year</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sqft">Square Footage</label>
+                    <div class="input-wrap suffix">
+                        <input type="number" id="sqft" value="1750" min="0" step="50">
+                        <span class="adorn">sq ft</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0">
+                    <label for="hoa">HOA Fee</label>
+                    <div class="input-wrap prefix">
+                        <span class="adorn">$</span>
+                        <input type="number" id="hoa" value="0" min="0" step="10">
+                        <span class="unit-trail">/mo</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Market Rates -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Market Rates</h2>
+                    <span class="badge">Auto-filled by ZIP</span>
+                    <button id="rates-override-btn" class="override-btn" onclick="toggleRatesLock()" style="display:none">✏️ Override</button>
+                </div>
+                <p class="card-note" id="rates-note">Populated from your ZIP code and market data.</p>
+
+                <div class="form-group">
+                    <label for="interest-rate">
+                        Mortgage Interest Rate
+                        <a href="https://fred.stlouisfed.org/series/MORTGAGE30US" target="_blank" class="source-link" id="rate-link">Source: FRED / Freddie Mac</a>
+                    </label>
+                    <div class="input-wrap suffix">
+                        <input type="number" id="interest-rate" value="6.99" step="0.05" min="0">
+                        <span class="adorn">%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="property-tax-rate">Annual Property Tax Rate</label>
+                    <div class="input-wrap suffix">
+                        <input type="number" id="property-tax-rate" value="1.23" step="0.01" min="0">
+                        <span class="adorn">% of value</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="insurance-rate">Homeowners Insurance Rate</label>
+                    <div class="input-wrap suffix">
+                        <input type="number" id="insurance-rate" value="0.75" step="0.01" min="0">
+                        <span class="adorn">% of value</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="utilities-rate">Utilities</label>
+                    <div class="input-wrap suffix">
+                        <input type="number" id="utilities-rate" value="0.187" step="0.001" min="0">
+                        <span class="adorn">$/sq ft/mo</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0">
+                    <div class="closing-header" onclick="toggleClosing()">
+                        <span class="closing-toggle-icon" id="closing-icon">▶</span>
+                        <span class="closing-label">Closing Costs</span>
+                        <span class="closing-summary-preview" id="closing-summary">—</span>
+                    </div>
+                    <div class="closing-items" id="closing-items">
+
+                        <div class="closing-item">
+                            <div class="closing-item-label">
+                                Buyer's Agent Fee
+                                <i class="tip" data-tip="Commission for your real estate agent. Since the 2024 NAR settlement, buyers negotiate this directly — it's no longer automatically paid by the seller. Typically 2–3% of purchase price. Set to 0 if buying without an agent or if the seller agrees to cover it.">i</i>
+                            </div>
+                            <div class="closing-item-right">
+                                <div class="input-wrap suffix mini">
+                                    <input type="number" id="agent-fee" value="2.50" step="0.25" min="0">
+                                    <span class="adorn">% of value</span>
+                                </div>
+                                <span class="closing-item-amount" id="r-agent-fee">—</span>
+                            </div>
+                        </div>
+
+                        <div class="closing-item">
+                            <div class="closing-item-label">
+                                Transfer Tax
+                                <span class="closing-item-note">Auto by state</span>
+                                <i class="tip" data-tip="Government fee charged when property changes hands. Varies widely — TX, FL, and several other states charge nothing; PA and NY can reach 1–2%+. Auto-filled with your state average; check your county for the exact rate.">i</i>
+                            </div>
+                            <div class="closing-item-right">
+                                <div class="input-wrap suffix mini">
+                                    <input type="number" id="transfer-tax" value="0.33" step="0.01" min="0">
+                                    <span class="adorn">% of value</span>
+                                </div>
+                                <span class="closing-item-amount" id="r-transfer-tax">—</span>
+                            </div>
+                        </div>
+
+                        <div class="closing-item">
+                            <div class="closing-item-label">
+                                Title Insurance
+                                <i class="tip" data-tip="Protects against disputes over property ownership. Lender's title insurance is required by most lenders; an owner's policy is optional but recommended. Typically 0.3–0.9% of purchase price. Some states regulate the rate.">i</i>
+                            </div>
+                            <div class="closing-item-right">
+                                <div class="input-wrap suffix mini">
+                                    <input type="number" id="title-insurance" value="0.50" step="0.01" min="0">
+                                    <span class="adorn">% of value</span>
+                                </div>
+                                <span class="closing-item-amount" id="r-title-insurance">—</span>
+                            </div>
+                        </div>
+
+                        <div class="closing-item">
+                            <div class="closing-item-label">
+                                Origination Fee
+                                <i class="tip" data-tip="The lender's charge for processing your loan — covers underwriting, application, and admin costs. Typically 0.5–1.5% of the loan amount. Sometimes negotiable or can be offset by accepting a slightly higher interest rate.">i</i>
+                            </div>
+                            <div class="closing-item-right">
+                                <div class="input-wrap suffix mini">
+                                    <input type="number" id="origination-fee" value="0.75" step="0.05" min="0">
+                                    <span class="adorn">% of loan</span>
+                                </div>
+                                <span class="closing-item-amount" id="r-origination-fee">—</span>
+                            </div>
+                        </div>
+
+                        <div class="closing-item">
+                            <div class="closing-item-label">
+                                Appraisal
+                                <i class="tip" data-tip="An independent estimate of the property's value, required by the lender before approving your loan. Typically $400–$700 for a standard single-family home; higher for larger or more complex properties.">i</i>
+                            </div>
+                            <div class="closing-item-right">
+                                <div class="input-wrap prefix mini">
+                                    <span class="adorn">$</span>
+                                    <input type="number" id="appraisal-fee" value="500" step="50" min="0">
+                                </div>
+                                <span class="closing-item-amount" id="r-appraisal-fee">—</span>
+                            </div>
+                        </div>
+
+                        <div class="closing-item">
+                            <div class="closing-item-label">
+                                Home Inspection
+                                <i class="tip" data-tip="A professional review of the property's condition. Not required by lenders but strongly recommended — it can reveal costly issues before you're committed. Typically $300–$500. Specialized inspections (radon, mold, sewer) cost extra.">i</i>
+                            </div>
+                            <div class="closing-item-right">
+                                <div class="input-wrap prefix mini">
+                                    <span class="adorn">$</span>
+                                    <input type="number" id="inspection-fee" value="400" step="50" min="0">
+                                </div>
+                                <span class="closing-item-amount" id="r-inspection-fee">—</span>
+                            </div>
+                        </div>
+
+                        <div class="closing-item">
+                            <div class="closing-item-label">
+                                Recording &amp; Legal
+                                <i class="tip" data-tip="Government fees to record the deed and mortgage with the county, plus attorney fees if required in your state (~20 states require an attorney at closing). Recording fees are typically $200–$800; attorney fees can add $500–$1,500+.">i</i>
+                            </div>
+                            <div class="closing-item-right">
+                                <div class="input-wrap prefix mini">
+                                    <span class="adorn">$</span>
+                                    <input type="number" id="recording-fee" value="600" step="50" min="0">
+                                </div>
+                                <span class="closing-item-amount" id="r-recording-fee">—</span>
+                            </div>
+                        </div>
+
+                        <div class="closing-item">
+                            <div class="closing-item-label">
+                                Other
+                                <i class="tip" data-tip="Any remaining costs: notary fees, courier/wire fees, HOA transfer fee, pest inspection, survey, etc. Typically $100–$500 in total for miscellaneous items.">i</i>
+                            </div>
+                            <div class="closing-item-right">
+                                <div class="input-wrap prefix mini">
+                                    <span class="adorn">$</span>
+                                    <input type="number" id="other-closing" value="200" step="50" min="0">
+                                </div>
+                                <span class="closing-item-amount" id="r-other-closing">—</span>
+                            </div>
+                        </div>
+
+                        <div class="closing-item closing-item-total">
+                            <div class="closing-item-label">Total Closing Costs</div>
+                            <div class="closing-item-right">
+                                <span></span>
+                                <span class="closing-item-amount" id="r-closing-total">—</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="field-hint">Click to expand and edit each item. Transfer tax auto-filled by ZIP.</div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ===== RIGHT: RESULTS ===== -->
+        <div class="results-col">
+
+            <!-- Hero total -->
+            <div class="card card-hero">
+                <div class="hero-label">Estimated Monthly Payment</div>
+                <div class="hero-amount" id="r-total">$—</div>
+            </div>
+
+            <!-- Monthly breakdown -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Monthly Breakdown</h2>
+                </div>
+                <div class="breakdown">
+                    <div class="line">
+                        <span>Mortgage (Principal &amp; Interest)</span>
+                        <span id="r-mortgage">—</span>
+                    </div>
+                    <div class="line">
+                        <span>Property Tax</span>
+                        <span id="r-tax">—</span>
+                    </div>
+                    <div class="line">
+                        <span>Homeowners Insurance</span>
+                        <span id="r-insurance">—</span>
+                    </div>
+                    <div class="line pmi-line" id="pmi-line" style="display:none">
+                        <span>Mortgage Insurance (PMI)</span>
+                        <span id="r-pmi">—</span>
+                    </div>
+                    <div class="line">
+                        <span>Utilities</span>
+                        <span id="r-utilities">—</span>
+                    </div>
+                    <div class="line hoa-line" id="hoa-line" style="display:none">
+                        <span>HOA</span>
+                        <span id="r-hoa">—</span>
+                    </div>
+                    <div class="line subtotal">
+                        <span>Total Monthly</span>
+                        <span id="r-monthly-total">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upfront costs -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Upfront Costs</h2>
+                </div>
+                <div class="breakdown">
+                    <div class="line">
+                        <span>Down Payment</span>
+                        <span id="r-down">—</span>
+                    </div>
+                    <div class="line">
+                        <span>Closing Costs (<span id="r-closing-pct-label">3.5</span>%)</span>
+                        <span id="r-closing">—</span>
+                    </div>
+                    <div class="line subtotal">
+                        <span>Cash to Close</span>
+                        <span id="r-cash-close">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full picture -->
+            <div class="card card-dark">
+                <div class="card-header">
+                    <h2>The Full Picture</h2>
+                </div>
+                <div class="breakdown">
+                    <div class="line">
+                        <span>Loan Amount</span>
+                        <span id="r-loan">—</span>
+                    </div>
+                    <div class="line">
+                        <span>Total Interest Paid (<span id="r-term-label">30</span> yrs)</span>
+                        <span id="r-interest">—</span>
+                    </div>
+                    <div class="line subtotal">
+                        <span>Total Cost of Home</span>
+                        <span id="r-total-cost">—</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
