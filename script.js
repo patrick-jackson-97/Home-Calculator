@@ -194,15 +194,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
     document.querySelectorAll('.tip').forEach(tipEl => {
-        // Tap/click: toggle
-        tipEl.addEventListener('click', e => {
-            e.stopPropagation();
-            if (activeTip === tipEl) { hideTip(); return; }
-            showTip(tipEl);
-        });
-        // Hover only on non-touch devices — on touch, mouseleave fires after
-        // tap and would immediately hide the tooltip
-        if (!isTouch) {
+        if (isTouch) {
+            // On touch: use touchstart + preventDefault so label elements
+            // don't redirect the tap to their associated input before we handle it
+            tipEl.addEventListener('touchstart', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (activeTip === tipEl) { hideTip(); return; }
+                showTip(tipEl);
+            }, { passive: false });
+        } else {
+            tipEl.addEventListener('click', e => {
+                e.stopPropagation();
+                if (activeTip === tipEl) { hideTip(); return; }
+                showTip(tipEl);
+            });
             tipEl.addEventListener('mouseenter', () => showTip(tipEl));
             tipEl.addEventListener('mouseleave', hideTip);
         }
