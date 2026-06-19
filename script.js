@@ -108,6 +108,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter') handleZipLookup();
     });
 
+    // Zillow button — show and update URL as address fields are filled
+    function updateZillowBtn() {
+        const addr1 = document.getElementById('addr1').value.trim();
+        const addr2 = document.getElementById('addr2').value.trim();
+        const btn   = document.getElementById('zillow-btn');
+        if (!btn) return;
+        if (addr1) {
+            const query = encodeURIComponent([addr1, addr2].filter(Boolean).join(' '));
+            btn.href         = `https://www.zillow.com/homes/${query}_rb/`;
+            btn.style.display = 'inline-flex';
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+    document.getElementById('addr1').addEventListener('input', updateZillowBtn);
+    document.getElementById('addr2').addEventListener('input', updateZillowBtn);
+
     if (FRED_API_KEY) fetchMortgageRate(term);
 
     // Desktop sticky ribbon — slide in when hero card scrolls out of view
