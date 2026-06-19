@@ -192,7 +192,9 @@ async function handleAddressLookup() {
         // Build result message
         const valueLabel = avmValue
             ? `Est. value: ${money(avmValue)}${avmLow ? ` (range: ${money(avmLow)}–${money(avmHigh)})` : ''}`
-            : `Assessed value: ${money(assessedValue)} — market value may differ`;
+            : assessedValue
+                ? `Assessed value: ${money(assessedValue)} — market value may differ`
+                : `Enter home value manually`;
 
         resultEl.innerHTML = `✓ ${displayAddr}<br><small style="opacity:0.85">${valueLabel}${sqft ? ` · ${sqft.toLocaleString()} sq ft` : ''}</small>`;
         resultEl.style.display = 'block';
