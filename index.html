@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Buying Cost Calculator</title>
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="style.css?v=11">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* ── Desktop sticky ribbon ── */
@@ -280,8 +280,9 @@
                     <label for="home-value">Home Value</label>
                     <div class="input-wrap prefix">
                         <span class="adorn">$</span>
-                        <input type="text" inputmode="decimal" id="home-value" value="400,000" autocomplete="off">
+                        <input type="text" inputmode="decimal" id="home-value" value="" placeholder="e.g. 400,000" autocomplete="off">
                     </div>
+                    <div class="field-hint">Not sure? Use the <strong>Zillow search</strong> in Property Lookup above for a reference value.</div>
                 </div>
 
                 <div class="form-group">
@@ -623,6 +624,6 @@
 
     </main>
 
-    <script src="script.js?v=10"></script>
+    <script src="script.js?v=11"></script>
 </body>
 </html>
