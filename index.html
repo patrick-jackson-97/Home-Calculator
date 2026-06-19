@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Buying Cost Calculator</title>
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* ── Desktop sticky ribbon ── */
@@ -90,6 +90,14 @@
         @media (max-width: 820px) {
             .card-body:not(.collapsed) { padding-top: 16px; }
         }
+
+        /* ── Address city/state/zip row ── */
+        .addr-city-row {
+            display: grid;
+            grid-template-columns: 1fr 58px 80px;
+            gap: 8px;
+        }
+        .addr-city-row .form-group { margin-bottom: 12px; }
 
         /* ── Zillow button ── */
         .zillow-btn {
@@ -220,39 +228,41 @@
                     <h2>Property Lookup</h2>
                     <span class="badge">Optional</span>
                 </div>
-                <p class="card-note">Enter an address to auto-fill home value and square footage from public records.</p>
+                <p class="card-note">Enter an address to auto-fill square footage and local market rates. ZIP alone is enough for market rates.</p>
 
                 <div class="form-group">
-                    <label for="addr1">Street Address</label>
-                    <input class="text-input" type="text" id="addr1" placeholder="e.g. 123 Main St">
+                    <label for="addr-street">Street Address</label>
+                    <input class="text-input" type="text" id="addr-street" placeholder="123 Main St" autocomplete="street-address">
                 </div>
-                <div class="form-group">
-                    <label for="addr2">City, State ZIP</label>
-                    <div class="zip-row">
-                        <input class="text-input" type="text" id="addr2" placeholder="e.g. Minneapolis MN 55401">
-                        <button id="addr-btn" onclick="handleAddressLookup()">Look Up</button>
+
+                <div class="addr-city-row">
+                    <div class="form-group">
+                        <label for="addr-city">City</label>
+                        <input class="text-input" type="text" id="addr-city" placeholder="Minneapolis" autocomplete="address-level2">
+                    </div>
+                    <div class="form-group">
+                        <label for="addr-state">State</label>
+                        <input class="text-input" type="text" id="addr-state" placeholder="MN" maxlength="2" autocomplete="address-level1" style="text-transform:uppercase">
+                    </div>
+                    <div class="form-group">
+                        <label for="addr-zip">ZIP</label>
+                        <input class="text-input" type="text" id="addr-zip" placeholder="55401" maxlength="5" inputmode="numeric" autocomplete="postal-code">
                     </div>
                 </div>
-                <div id="addr-result" class="location-info" style="display:none"></div>
+
+                <div class="zip-row" style="margin-bottom:0">
+                    <button id="addr-btn" style="width:100%" onclick="handleAddressLookup()">Look Up</button>
+                </div>
+
+                <div id="addr-result" class="location-info" style="display:none;margin-top:10px"></div>
                 <div id="addr-error" class="field-error" style="display:none"></div>
+                <div id="location-display" class="location-info" style="display:none;margin-top:10px"></div>
+                <div id="zip-error" class="field-error" style="display:none"></div>
                 <a id="zillow-btn" href="#" target="_blank" rel="noopener" class="zillow-btn" style="display:none">
                     <img src="https://www.zillow.com/favicon.ico" width="14" height="14" alt="" style="border-radius:2px">
                     Search on Zillow
                     <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.65rem;opacity:0.7"></i>
                 </a>
-
-                <div class="section-divider"></div>
-
-                <p class="card-note" style="margin-bottom:10px">Or enter just a ZIP code to auto-fill local market rates.</p>
-                <div class="form-group" style="margin-bottom:0">
-                    <label for="zip">ZIP Code</label>
-                    <div class="zip-row">
-                        <input type="text" id="zip" maxlength="5" placeholder="e.g. 55401" inputmode="numeric">
-                        <button id="zip-btn" onclick="handleZipLookup()">Look Up</button>
-                    </div>
-                    <div id="location-display" class="location-info" style="display:none"></div>
-                    <div id="zip-error" class="field-error" style="display:none"></div>
-                </div>
             </div>
 
             <!-- Property Details -->
@@ -266,7 +276,7 @@
                     <label for="home-value">Home Value</label>
                     <div class="input-wrap prefix">
                         <span class="adorn">$</span>
-                        <input type="number" id="home-value" value="400000" min="0" step="1000">
+                        <input type="text" inputmode="decimal" id="home-value" value="400,000" autocomplete="off">
                     </div>
                 </div>
 
@@ -282,7 +292,7 @@
                     </div>
                     <div id="dp-dollar-wrap" class="input-wrap prefix" style="display:none">
                         <span class="adorn">$</span>
-                        <input type="number" id="dp-dollar" value="80000" min="0" step="1000">
+                        <input type="text" inputmode="decimal" id="dp-dollar" value="80,000" autocomplete="off">
                     </div>
                     <div class="dp-preview" id="dp-preview">= $80,000 (20.0%)</div>
                     <div class="pmi-warning" id="pmi-warning" style="display:none">
@@ -316,7 +326,7 @@
                     <label for="hoa">HOA Fee</label>
                     <div class="input-wrap prefix">
                         <span class="adorn">$</span>
-                        <input type="number" id="hoa" value="0" min="0" step="10">
+                        <input type="text" inputmode="decimal" id="hoa" value="0" autocomplete="off">
                         <span class="unit-trail">/mo</span>
                     </div>
                 </div>
@@ -441,7 +451,7 @@
                             <div class="closing-item-right">
                                 <div class="input-wrap prefix mini">
                                     <span class="adorn">$</span>
-                                    <input type="number" id="appraisal-fee" value="500" step="50" min="0">
+                                    <input type="text" inputmode="decimal" id="appraisal-fee" value="500" autocomplete="off">
                                 </div>
                                 <span class="closing-item-amount" id="r-appraisal-fee">—</span>
                             </div>
@@ -455,7 +465,7 @@
                             <div class="closing-item-right">
                                 <div class="input-wrap prefix mini">
                                     <span class="adorn">$</span>
-                                    <input type="number" id="inspection-fee" value="400" step="50" min="0">
+                                    <input type="text" inputmode="decimal" id="inspection-fee" value="400" autocomplete="off">
                                 </div>
                                 <span class="closing-item-amount" id="r-inspection-fee">—</span>
                             </div>
@@ -469,7 +479,7 @@
                             <div class="closing-item-right">
                                 <div class="input-wrap prefix mini">
                                     <span class="adorn">$</span>
-                                    <input type="number" id="recording-fee" value="600" step="50" min="0">
+                                    <input type="text" inputmode="decimal" id="recording-fee" value="600" autocomplete="off">
                                 </div>
                                 <span class="closing-item-amount" id="r-recording-fee">—</span>
                             </div>
@@ -483,7 +493,7 @@
                             <div class="closing-item-right">
                                 <div class="input-wrap prefix mini">
                                     <span class="adorn">$</span>
-                                    <input type="number" id="other-closing" value="200" step="50" min="0">
+                                    <input type="text" inputmode="decimal" id="other-closing" value="200" autocomplete="off">
                                 </div>
                                 <span class="closing-item-amount" id="r-other-closing">—</span>
                             </div>
@@ -609,6 +619,6 @@
 
     </main>
 
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=8"></script>
 </body>
 </html>

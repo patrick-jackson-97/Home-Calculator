@@ -104,26 +104,39 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(id).addEventListener('input', calculate);
     });
 
-    document.getElementById('zip').addEventListener('keydown', e => {
-        if (e.key === 'Enter') handleZipLookup();
+    // Comma formatting for dollar inputs
+    const dollarIds = ['home-value', 'dp-dollar', 'hoa', 'appraisal-fee', 'inspection-fee', 'recording-fee', 'other-closing'];
+    dollarIds.forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            formatDollar(this);
+            calculate();
+        });
     });
 
-    // Zillow button — show and update URL as address fields are filled
+    // Zillow button — update as address fields change
     function updateZillowBtn() {
-        const addr1 = document.getElementById('addr1').value.trim();
-        const addr2 = document.getElementById('addr2').value.trim();
-        const btn   = document.getElementById('zillow-btn');
+        const street = document.getElementById('addr-street').value.trim();
+        const city   = document.getElementById('addr-city').value.trim();
+        const state  = document.getElementById('addr-state').value.trim();
+        const zip    = document.getElementById('addr-zip').value.trim();
+        const btn    = document.getElementById('zillow-btn');
         if (!btn) return;
-        if (addr1) {
-            const query = encodeURIComponent([addr1, addr2].filter(Boolean).join(' '));
-            btn.href         = `https://www.zillow.com/homes/${query}_rb/`;
+        if (street) {
+            const full  = [street, city, state, zip].filter(Boolean).join(' ');
+            btn.href          = `https://www.zillow.com/homes/${encodeURIComponent(full)}_rb/`;
             btn.style.display = 'inline-flex';
         } else {
             btn.style.display = 'none';
         }
     }
-    document.getElementById('addr1').addEventListener('input', updateZillowBtn);
-    document.getElementById('addr2').addEventListener('input', updateZillowBtn);
+    ['addr-street','addr-city','addr-state','addr-zip'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateZillowBtn);
+    });
+
+    // Auto-trigger ZIP market rates when 5 digits entered
+    document.getElementById('addr-zip').addEventListener('input', function() {
+        if (/^\d{5}$/.test(this.value.trim())) handleZipLookup(this.value.trim());
+    });
 
     if (FRED_API_KEY) fetchMortgageRate(term);
 
@@ -170,8 +183,12 @@ function toggleCardBody(id, header) {
 // Fetches estimated home value and square footage from public records.
 // =============================================================
 async function handleAddressLookup() {
-    const addr1    = document.getElementById('addr1').value.trim();
-    const addr2    = document.getElementById('addr2').value.trim();
+    const street   = document.getElementById('addr-street').value.trim();
+    const city     = document.getElementById('addr-city').value.trim();
+    const state    = document.getElementById('addr-state').value.trim();
+    const zip      = document.getElementById('addr-zip').value.trim();
+    const addr1    = street;
+    const addr2    = [city, state, zip].filter(Boolean).join(' ');
     const resultEl = document.getElementById('addr-result');
     const errorEl  = document.getElementById('addr-error');
     const btn      = document.getElementById('addr-btn');
@@ -179,8 +196,14 @@ async function handleAddressLookup() {
     resultEl.style.display = 'none';
     errorEl.style.display  = 'none';
 
-    if (!addr1 || !addr2) {
-        errorEl.textContent   = 'Enter both a street address and city/state/ZIP.';
+    // ZIP-only path: no street address, just trigger market rates
+    if (!street && zip.length === 5) {
+        await handleZipLookup(zip);
+        return;
+    }
+
+    if (!street) {
+        errorEl.textContent   = 'Enter a street address, or just a ZIP code for market rates.';
         errorEl.style.display = 'block';
         return;
     }
@@ -234,7 +257,7 @@ async function handleAddressLookup() {
 
         // Populate fields — prefer AVM over assessed value
         const homeValue = avmValue || assessedValue;
-        if (homeValue) document.getElementById('home-value').value = homeValue;
+        if (homeValue) document.getElementById('home-value').value = Math.round(homeValue).toLocaleString('en-US');
         if (sqft) {
             document.getElementById('sqft').value = sqft;
             lockSqft();
@@ -242,8 +265,8 @@ async function handleAddressLookup() {
 
         // Auto-trigger ZIP lookup to fill market rates
         if (zip) {
-            document.getElementById('zip').value = zip;
-            await handleZipLookup();
+            document.getElementById('addr-zip').value = zip;
+            await handleZipLookup(zip);
         }
 
         // Build result message
@@ -272,11 +295,11 @@ async function handleAddressLookup() {
 // ZIP CODE LOOKUP
 // Uses zippopotam.us — free, no API key needed
 // =============================================================
-async function handleZipLookup() {
-    const zip      = document.getElementById('zip').value.trim();
+async function handleZipLookup(zipOverride) {
+    const zip      = zipOverride || document.getElementById('addr-zip').value.trim();
     const errorEl  = document.getElementById('zip-error');
     const locEl    = document.getElementById('location-display');
-    const btn      = document.getElementById('zip-btn');
+    const btn      = document.getElementById('addr-btn');
 
     errorEl.style.display = 'none';
     locEl.style.display   = 'none';
@@ -621,7 +644,24 @@ function calculate() {
 // HELPERS
 // =============================================================
 function num(id) {
-    return parseFloat(document.getElementById(id).value) || 0;
+    const val = document.getElementById(id).value.replace(/,/g, '');
+    return parseFloat(val) || 0;
+}
+
+// Format a dollar input with commas while typing
+function formatDollar(input) {
+    const pos    = input.selectionStart;
+    const before = (input.value.slice(0, pos).match(/\d/g) || []).length;
+    const digits = input.value.replace(/[^\d]/g, '');
+    const formatted = digits ? parseInt(digits, 10).toLocaleString('en-US') : '';
+    input.value = formatted;
+    // Restore cursor: count forward through formatted string to find same digit position
+    let count = 0, newPos = 0;
+    for (let i = 0; i < formatted.length; i++) {
+        if (/\d/.test(formatted[i])) count++;
+        if (count === before) { newPos = i + 1; break; }
+    }
+    try { input.setSelectionRange(newPos, newPos); } catch(e) {}
 }
 
 function set(id, value) {
