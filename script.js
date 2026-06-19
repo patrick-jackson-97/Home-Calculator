@@ -61,6 +61,13 @@ const TRANSFER_TAX = {
 const RATE_DEFAULTS = { 30: 6.99, 15: 6.30 };
 
 // =============================================================
+// OPTIONAL: ATTOM API FOR ADDRESS / PROPERTY LOOKUP
+// 1. Sign up for a free trial at https://api.gateway.attomdata.com
+// 2. Paste your API key below
+// =============================================================
+const ATTOM_API_KEY = '781294974224fc64dbb4d2df2fd04d32';
+
+// =============================================================
 // OPTIONAL: FRED API FOR LIVE MORTGAGE RATES
 // 1. Sign up free at https://fredaccount.stlouisfed.org/login/secure/
 //    (takes about 60 seconds — no credit card)
@@ -103,6 +110,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
     calculate();
 });
+
+// =============================================================
+// ADDRESS / PROPERTY LOOKUP (ATTOM Data)
+// Fetches estimated home value and square footage from public records.
+// =============================================================
+async function handleAddressLookup() {
+    const addr1    = document.getElementById('addr1').value.trim();
+    const addr2    = document.getElementById('addr2').value.trim();
+    const resultEl = document.getElementById('addr-result');
+    const errorEl  = document.getElementById('addr-error');
+    const btn      = document.getElementById('addr-btn');
+
+    resultEl.style.display = 'none';
+    errorEl.style.display  = 'none';
+
+    if (!addr1 || !addr2) {
+        errorEl.textContent   = 'Enter both a street address and city/state/ZIP.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (!ATTOM_API_KEY) {
+        errorEl.textContent   = 'Add your ATTOM API key to script.js to enable address lookup.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    btn.textContent = '…';
+    btn.disabled    = true;
+
+    const base    = 'https://api.gateway.attomdata.com/propertyapi/v1.0.0';
+    const params  = `address1=${encodeURIComponent(addr1)}&address2=${encodeURIComponent(addr2)}`;
+    const headers = { 'apikey': ATTOM_API_KEY, 'accept': 'application/json' };
+
+    try {
+        // Fetch property detail and AVM simultaneously
+        const [detailRes, avmRes] = await Promise.allSettled([
+            fetch(`${base}/property/detail?${params}`,    { headers }),
+            fetch(`${base}/property/avmdetail?${params}`, { headers })
+        ]);
+
+        // Parse detail (building size, address, assessed value)
+        let sqft = 0, assessedValue = 0, zip = '', displayAddr = '';
+        if (detailRes.status === 'fulfilled' && detailRes.value.ok) {
+            const d    = await detailRes.value.json();
+            const prop = d.property?.[0];
+            if (prop) {
+                sqft          = prop.building?.size?.universalsize || prop.building?.size?.grosssize || 0;
+                assessedValue = prop.assessment?.assessed?.assdttlvalue || 0;
+                zip           = prop.address?.postal1 || '';
+                displayAddr   = prop.address?.oneLine || `${addr1}, ${addr2}`;
+            }
+        }
+
+        // Parse AVM (estimated market value — better than assessed value when available)
+        let avmValue = 0, avmLow = 0, avmHigh = 0;
+        if (avmRes.status === 'fulfilled' && avmRes.value.ok) {
+            const d    = await avmRes.value.json();
+            const prop = d.property?.[0];
+            if (prop) {
+                avmValue = prop.avm?.amount?.value || 0;
+                avmLow   = prop.avm?.amount?.low   || 0;
+                avmHigh  = prop.avm?.amount?.high  || 0;
+            }
+        }
+
+        if (!sqft && !avmValue && !assessedValue) throw new Error('No data returned');
+
+        // Populate fields — prefer AVM over assessed value
+        const homeValue = avmValue || assessedValue;
+        if (homeValue) document.getElementById('home-value').value = homeValue;
+        if (sqft)      document.getElementById('sqft').value       = sqft;
+
+        // Auto-trigger ZIP lookup to fill market rates
+        if (zip) {
+            document.getElementById('zip').value = zip;
+            await handleZipLookup();
+        }
+
+        // Build result message
+        const valueLabel = avmValue
+            ? `Est. value: ${money(avmValue)}${avmLow ? ` (range: ${money(avmLow)}–${money(avmHigh)})` : ''}`
+            : `Assessed value: ${money(assessedValue)} — market value may differ`;
+
+        resultEl.innerHTML = `✓ ${displayAddr}<br><small style="opacity:0.85">${valueLabel}${sqft ? ` · ${sqft.toLocaleString()} sq ft` : ''}</small>`;
+        resultEl.style.display = 'block';
+
+        calculate();
+
+    } catch (err) {
+        errorEl.textContent   = 'Property not found. Check the address and try again.';
+        errorEl.style.display = 'block';
+        console.error('ATTOM lookup error:', err);
+    } finally {
+        btn.textContent = 'Look Up';
+        btn.disabled    = false;
+    }
+}
 
 // =============================================================
 // ZIP CODE LOOKUP

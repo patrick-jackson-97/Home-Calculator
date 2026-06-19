@@ -20,12 +20,32 @@
         <!-- ===== LEFT: INPUTS ===== -->
         <div class="inputs-col">
 
-            <!-- Location -->
+            <!-- Property Lookup -->
             <div class="card">
                 <div class="card-header">
-                    <h2>Location</h2>
+                    <h2>Property Lookup</h2>
+                    <span class="badge">Optional</span>
+                </div>
+                <p class="card-note">Enter an address to auto-fill home value and square footage from public records.</p>
+
+                <div class="form-group">
+                    <label for="addr1">Street Address</label>
+                    <input class="text-input" type="text" id="addr1" placeholder="e.g. 123 Main St">
                 </div>
                 <div class="form-group">
+                    <label for="addr2">City, State ZIP</label>
+                    <div class="zip-row">
+                        <input class="text-input" type="text" id="addr2" placeholder="e.g. Minneapolis MN 55401">
+                        <button id="addr-btn" onclick="handleAddressLookup()">Look Up</button>
+                    </div>
+                </div>
+                <div id="addr-result" class="location-info" style="display:none"></div>
+                <div id="addr-error" class="field-error" style="display:none"></div>
+
+                <div class="section-divider"></div>
+
+                <p class="card-note" style="margin-bottom:10px">Or enter just a ZIP code to auto-fill local market rates.</p>
+                <div class="form-group" style="margin-bottom:0">
                     <label for="zip">ZIP Code</label>
                     <div class="zip-row">
                         <input type="text" id="zip" maxlength="5" placeholder="e.g. 55401" inputmode="numeric">
