@@ -110,8 +110,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (FRED_API_KEY) fetchMortgageRate(term);
 
+    // Desktop sticky ribbon — slide in when hero card scrolls out of view
+    const heroCard     = document.querySelector('.card-hero');
+    const desktopSticky = document.getElementById('desktop-sticky');
+    if (heroCard && desktopSticky) {
+        const observer = new IntersectionObserver(entries => {
+            desktopSticky.classList.toggle('visible', !entries[0].isIntersecting);
+        }, { threshold: 0 });
+        observer.observe(heroCard);
+    }
+
+    // Collapsible result cards — start collapsed on mobile
+    const isMobile = window.matchMedia('(max-width: 820px)').matches;
+    ['body-monthly', 'body-upfront', 'body-fullpic'].forEach(id => {
+        const body   = document.getElementById(id);
+        const header = body ? body.previousElementSibling : null;
+        const chevron = header ? header.querySelector('.collapse-chevron') : null;
+        if (isMobile && body) {
+            body.classList.add('collapsed');
+        } else if (chevron) {
+            chevron.classList.add('open');
+        }
+    });
+
     calculate();
 });
+
+// =============================================================
+// COLLAPSIBLE CARD BODY
+// =============================================================
+function toggleCardBody(id, header) {
+    const body    = document.getElementById(id);
+    const chevron = header.querySelector('.collapse-chevron');
+    if (!body) return;
+    const isCollapsed = body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', !isCollapsed);
+    if (chevron) chevron.classList.toggle('open', !isCollapsed);
+}
 
 // =============================================================
 // ADDRESS / PROPERTY LOOKUP (ATTOM Data)
@@ -517,11 +552,18 @@ function calculate() {
 
     document.getElementById('hoa-line').style.display = hoa > 0 ? 'flex' : 'none';
 
-    // Update mobile sticky bar (guard against missing elements)
+    // Update sticky bars
     const elMobileTotal    = document.getElementById('mobile-r-total');
     const elMobileMortgage = document.getElementById('mobile-r-mortgage');
     if (elMobileTotal)    elMobileTotal.textContent    = money(totalMonthly);
     if (elMobileMortgage) elMobileMortgage.textContent = money(monthlyMortgage);
+
+    const elDsTotal    = document.getElementById('ds-total');
+    const elDsMortgage = document.getElementById('ds-mortgage');
+    const elDsCash     = document.getElementById('ds-cash');
+    if (elDsTotal)    elDsTotal.textContent    = money(totalMonthly);
+    if (elDsMortgage) elDsMortgage.textContent = money(monthlyMortgage);
+    if (elDsCash)     elDsCash.textContent     = money(cashToClose);
 
     // Update results
     set('r-total',         money(totalMonthly));

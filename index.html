@@ -4,9 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Buying Cost Calculator</title>
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        /* ── Desktop sticky ribbon ── */
+        #desktop-sticky {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 300;
+            background:
+                radial-gradient(ellipse at 10% 50%, rgba(255,255,255,0.10) 0%, transparent 55%),
+                linear-gradient(135deg, #1a4d31 0%, #2e7d52 100%);
+            color: white;
+            padding: 10px 32px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+            transform: translateY(-100%);
+            transition: transform 0.25s ease;
+        }
+        #desktop-sticky.visible { transform: translateY(0); }
+        .desktop-sticky-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+        .desktop-sticky-brand {
+            font-size: 0.9rem;
+            font-weight: 700;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .desktop-sticky-stats {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .desktop-stat { text-align: right; }
+        .desktop-stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.7;
+            margin-bottom: 1px;
+        }
+        .desktop-stat-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+        .desktop-stat-divider {
+            width: 1px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            margin: 0 16px;
+        }
+        @media (max-width: 820px) {
+            #desktop-sticky { display: none; }
+        }
+
+        /* ── Collapsible card bodies ── */
+        .collapsible-header { cursor: pointer; user-select: none; margin-bottom: 0; }
+        .collapsible-header:hover .collapse-chevron { opacity: 1; }
+        .collapse-chevron {
+            font-size: 0.75rem;
+            opacity: 0.45;
+            transition: transform 0.2s ease, opacity 0.15s;
+        }
+        .collapse-chevron.open { transform: rotate(180deg); }
+        .card-body {
+            overflow: hidden;
+            transition: max-height 0.28s ease, opacity 0.2s ease;
+            max-height: 600px;
+            opacity: 1;
+        }
+        .card-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        /* On mobile, add top padding back since header loses bottom margin */
+        @media (max-width: 820px) {
+            .card-body:not(.collapsed) { padding-top: 16px; }
+        }
+
         /* Mobile sticky bar — inline to bypass any caching */
         #mobile-sticky {
             display: none;
@@ -66,6 +150,32 @@
             <p>See your true monthly cost of homeownership</p>
         </div>
     </header>
+
+    <!-- Sticky ribbon — desktop (slides in on scroll) -->
+    <div id="desktop-sticky">
+        <div class="desktop-sticky-inner">
+            <div class="desktop-sticky-brand">
+                <i class="fa-solid fa-house-chimney"></i>
+                Home Buying Calculator
+            </div>
+            <div class="desktop-sticky-stats">
+                <div class="desktop-stat">
+                    <div class="desktop-stat-label">Monthly Cost</div>
+                    <div class="desktop-stat-value" id="ds-total">$—</div>
+                </div>
+                <div class="desktop-stat-divider"></div>
+                <div class="desktop-stat">
+                    <div class="desktop-stat-label">Mortgage P&amp;I</div>
+                    <div class="desktop-stat-value" id="ds-mortgage">$—</div>
+                </div>
+                <div class="desktop-stat-divider"></div>
+                <div class="desktop-stat">
+                    <div class="desktop-stat-label">Cash to Close</div>
+                    <div class="desktop-stat-value" id="ds-cash">$—</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Sticky monthly total — mobile only -->
     <div id="mobile-sticky">
@@ -384,82 +494,91 @@
 
             <!-- Monthly breakdown -->
             <div class="card">
-                <div class="card-header">
+                <div class="card-header collapsible-header" onclick="toggleCardBody('body-monthly', this)">
                     <span class="card-icon"><i class="fa-solid fa-receipt"></i></span>
                     <h2>Monthly Breakdown</h2>
+                    <span class="collapse-chevron" style="margin-left:auto"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="breakdown">
-                    <div class="line">
-                        <span>Mortgage (Principal &amp; Interest)</span>
-                        <span id="r-mortgage">—</span>
-                    </div>
-                    <div class="line">
-                        <span>Property Tax</span>
-                        <span id="r-tax">—</span>
-                    </div>
-                    <div class="line">
-                        <span>Homeowners Insurance</span>
-                        <span id="r-insurance">—</span>
-                    </div>
-                    <div class="line pmi-line" id="pmi-line" style="display:none">
-                        <span>Mortgage Insurance (PMI)</span>
-                        <span id="r-pmi">—</span>
-                    </div>
-                    <div class="line">
-                        <span>Utilities</span>
-                        <span id="r-utilities">—</span>
-                    </div>
-                    <div class="line hoa-line" id="hoa-line" style="display:none">
-                        <span>HOA</span>
-                        <span id="r-hoa">—</span>
-                    </div>
-                    <div class="line subtotal">
-                        <span>Total Monthly</span>
-                        <span id="r-monthly-total">—</span>
+                <div class="card-body" id="body-monthly">
+                    <div class="breakdown">
+                        <div class="line">
+                            <span>Mortgage (Principal &amp; Interest)</span>
+                            <span id="r-mortgage">—</span>
+                        </div>
+                        <div class="line">
+                            <span>Property Tax</span>
+                            <span id="r-tax">—</span>
+                        </div>
+                        <div class="line">
+                            <span>Homeowners Insurance</span>
+                            <span id="r-insurance">—</span>
+                        </div>
+                        <div class="line pmi-line" id="pmi-line" style="display:none">
+                            <span>Mortgage Insurance (PMI)</span>
+                            <span id="r-pmi">—</span>
+                        </div>
+                        <div class="line">
+                            <span>Utilities</span>
+                            <span id="r-utilities">—</span>
+                        </div>
+                        <div class="line hoa-line" id="hoa-line" style="display:none">
+                            <span>HOA</span>
+                            <span id="r-hoa">—</span>
+                        </div>
+                        <div class="line subtotal">
+                            <span>Total Monthly</span>
+                            <span id="r-monthly-total">—</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Upfront costs -->
             <div class="card">
-                <div class="card-header">
+                <div class="card-header collapsible-header" onclick="toggleCardBody('body-upfront', this)">
                     <span class="card-icon"><i class="fa-solid fa-wallet"></i></span>
                     <h2>Upfront Costs</h2>
+                    <span class="collapse-chevron" style="margin-left:auto"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="breakdown">
-                    <div class="line">
-                        <span>Down Payment</span>
-                        <span id="r-down">—</span>
-                    </div>
-                    <div class="line">
-                        <span>Closing Costs (<span id="r-closing-pct-label">3.5</span>%)</span>
-                        <span id="r-closing">—</span>
-                    </div>
-                    <div class="line subtotal">
-                        <span>Cash to Close</span>
-                        <span id="r-cash-close">—</span>
+                <div class="card-body" id="body-upfront">
+                    <div class="breakdown">
+                        <div class="line">
+                            <span>Down Payment</span>
+                            <span id="r-down">—</span>
+                        </div>
+                        <div class="line">
+                            <span>Closing Costs (<span id="r-closing-pct-label">3.5</span>%)</span>
+                            <span id="r-closing">—</span>
+                        </div>
+                        <div class="line subtotal">
+                            <span>Cash to Close</span>
+                            <span id="r-cash-close">—</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Full picture -->
             <div class="card card-dark">
-                <div class="card-header">
+                <div class="card-header collapsible-header" onclick="toggleCardBody('body-fullpic', this)">
                     <span class="card-icon"><i class="fa-solid fa-binoculars"></i></span>
                     <h2>The Full Picture</h2>
+                    <span class="collapse-chevron" style="margin-left:auto"><i class="fa-solid fa-chevron-down"></i></span>
                 </div>
-                <div class="breakdown">
-                    <div class="line">
-                        <span>Loan Amount</span>
-                        <span id="r-loan">—</span>
-                    </div>
-                    <div class="line">
-                        <span>Total Interest Paid (<span id="r-term-label">30</span> yrs)</span>
-                        <span id="r-interest">—</span>
-                    </div>
-                    <div class="line subtotal">
-                        <span>Total Cost of Home</span>
-                        <span id="r-total-cost">—</span>
+                <div class="card-body" id="body-fullpic">
+                    <div class="breakdown">
+                        <div class="line">
+                            <span>Loan Amount</span>
+                            <span id="r-loan">—</span>
+                        </div>
+                        <div class="line">
+                            <span>Total Interest Paid (<span id="r-term-label">30</span> yrs)</span>
+                            <span id="r-interest">—</span>
+                        </div>
+                        <div class="line subtotal">
+                            <span>Total Cost of Home</span>
+                            <span id="r-total-cost">—</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -468,6 +587,6 @@
 
     </main>
 
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>
