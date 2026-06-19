@@ -517,9 +517,11 @@ function calculate() {
 
     document.getElementById('hoa-line').style.display = hoa > 0 ? 'flex' : 'none';
 
-    // Update mobile sticky bar
-    set('mobile-r-total',    money(totalMonthly));
-    set('mobile-r-mortgage', money(monthlyMortgage));
+    // Update mobile sticky bar (guard against missing elements)
+    const elMobileTotal    = document.getElementById('mobile-r-total');
+    const elMobileMortgage = document.getElementById('mobile-r-mortgage');
+    if (elMobileTotal)    elMobileTotal.textContent    = money(totalMonthly);
+    if (elMobileMortgage) elMobileMortgage.textContent = money(monthlyMortgage);
 
     // Update results
     set('r-total',         money(totalMonthly));
