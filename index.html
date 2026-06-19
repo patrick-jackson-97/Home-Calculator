@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Buying Cost Calculator</title>
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=13">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* ── Desktop sticky ribbon ── */
@@ -94,6 +94,27 @@
         /* ── Prevent horizontal scroll on mobile ── */
         html, body { max-width: 100%; overflow-x: clip; }
         * { min-width: 0; }
+
+        /* ── Shared tooltip popup (JS-positioned, works on touch) ── */
+        #tip-popup {
+            position: fixed;
+            z-index: 9999;
+            background: #1e2a3a;
+            color: #f0f4f9;
+            padding: 10px 13px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            width: 240px;
+            max-width: calc(100vw - 24px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            white-space: normal;
+            text-align: left;
+        }
+        #tip-popup.visible { opacity: 1; pointer-events: auto; }
 
         /* ── Address city/state/zip row ── */
         .addr-city-row {
@@ -596,7 +617,7 @@
             </div>
 
             <!-- Full picture -->
-            <div class="card card-dark">
+            <div class="card">
                 <div class="card-header collapsible-header" onclick="toggleCardBody('body-fullpic', this)">
                     <span class="card-icon"><i class="fa-solid fa-binoculars"></i></span>
                     <h2>The Full Picture</h2>
@@ -624,6 +645,8 @@
 
     </main>
 
-    <script src="script.js?v=13"></script>
+    <div id="tip-popup" role="tooltip" aria-live="polite"></div>
+
+    <script src="script.js?v=16"></script>
 </body>
 </html>

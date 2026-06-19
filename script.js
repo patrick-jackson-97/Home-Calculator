@@ -150,6 +150,64 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(heroCard);
     }
 
+    // ── Tooltip popup (tap-to-open, works on touch devices) ──
+    const tipPopup = document.getElementById('tip-popup');
+    let activeTip = null;
+
+    function showTip(tipEl) {
+        if (!tipPopup) return;
+        tipPopup.textContent = tipEl.dataset.tip;
+
+        // Position offscreen first so browser can measure height
+        tipPopup.style.left = '-9999px';
+        tipPopup.style.top  = '-9999px';
+        tipPopup.classList.add('visible');
+
+        // After paint, measure and place correctly
+        requestAnimationFrame(() => {
+            const rect   = tipEl.getBoundingClientRect();
+            const popW   = tipPopup.offsetWidth  || 240;
+            const popH   = tipPopup.offsetHeight || 80;
+            const margin = 12;
+
+            // Horizontal: center on icon, clamp to viewport edges
+            let left = rect.left + rect.width / 2 - popW / 2;
+            left = Math.max(margin, Math.min(left, window.innerWidth - popW - margin));
+
+            // Vertical: above icon; flip below if not enough room
+            let top = rect.top - popH - 10;
+            if (top < margin) top = rect.bottom + 10;
+
+            // position: fixed → viewport coords only, no scrollY
+            tipPopup.style.left = left + 'px';
+            tipPopup.style.top  = top  + 'px';
+        });
+
+        activeTip = tipEl;
+    }
+
+    function hideTip() {
+        if (tipPopup) tipPopup.classList.remove('visible');
+        activeTip = null;
+    }
+
+    document.querySelectorAll('.tip').forEach(tipEl => {
+        // Tap/click: toggle
+        tipEl.addEventListener('click', e => {
+            e.stopPropagation();
+            if (activeTip === tipEl) { hideTip(); return; }
+            showTip(tipEl);
+        });
+        // Desktop hover
+        tipEl.addEventListener('mouseenter', () => showTip(tipEl));
+        tipEl.addEventListener('mouseleave', hideTip);
+    });
+
+    // Dismiss on tap/click outside any tip
+    document.addEventListener('click', e => {
+        if (activeTip && !e.target.classList.contains('tip')) hideTip();
+    });
+
     // Collapsible result cards — start collapsed on mobile
     const isMobile = window.matchMedia('(max-width: 820px)').matches;
     ['body-monthly', 'body-upfront', 'body-fullpic'].forEach(id => {

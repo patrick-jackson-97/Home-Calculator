@@ -720,59 +720,7 @@ label {
     font-style: normal;
 }
 
-.tip::after {
-    content: attr(data-tip);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e2a3a;
-    color: #f0f4f9;
-    padding: 9px 12px;
-    border-radius: 7px;
-    font-size: 0.76rem;
-    line-height: 1.45;
-    width: 230px;
-    text-align: left;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s;
-    z-index: 200;
-    font-weight: 400;
-    white-space: normal;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-}
-
-.tip::before {
-    content: '';
-    position: absolute;
-    bottom: calc(100% + 4px);
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #1e2a3a;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s;
-    z-index: 200;
-}
-
-.tip:hover::after,
-.tip:hover::before { opacity: 1; }
-
-/* Flip tooltip to the right when icon is near left edge */
-.tip.tip-right::after {
-    left: 100%;
-    bottom: 50%;
-    transform: translateY(50%);
-    margin-left: 8px;
-}
-.tip.tip-right::before {
-    left: 100%;
-    bottom: 50%;
-    transform: translateY(50%) rotate(-90deg);
-    margin-left: -1px;
-}
+/* Pseudo-element tooltips removed — JS popup handles both hover and tap */
 
 /* Mini input wrap used inside closing cost rows */
 .input-wrap.mini { min-width: 0; }
