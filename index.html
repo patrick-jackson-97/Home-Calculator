@@ -102,10 +102,16 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="sqft">Square Footage</label>
-                    <div class="input-wrap suffix">
+                    <label for="sqft">
+                        Square Footage
+                        <button id="sqft-override-btn" class="override-btn" onclick="toggleSqftLock()" style="display:none">✏️ Override</button>
+                    </label>
+                    <div class="input-wrap suffix" id="sqft-wrap">
                         <input type="number" id="sqft" value="1750" min="0" step="50">
                         <span class="adorn">sq ft</span>
+                    </div>
+                    <div id="sqft-source" class="field-hint" style="display:none">
+                        📐 From ATTOM property records
                     </div>
                 </div>
 

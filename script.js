@@ -83,6 +83,8 @@ let dpMode      = 'pct';  // 'pct' or 'dollar'
 let term        = 30;     // mortgage term in years
 let ratesLocked = false;
 let savedRates  = {};     // stores auto-fetched values for reset
+let sqftLocked  = false;
+let savedSqft   = null;
 
 // Fields that get locked after auto-fill
 const RATE_FIELDS = ['interest-rate', 'property-tax-rate', 'insurance-rate', 'utilities-rate'];
@@ -181,7 +183,10 @@ async function handleAddressLookup() {
         // Populate fields — prefer AVM over assessed value
         const homeValue = avmValue || assessedValue;
         if (homeValue) document.getElementById('home-value').value = homeValue;
-        if (sqft)      document.getElementById('sqft').value       = sqft;
+        if (sqft) {
+            document.getElementById('sqft').value = sqft;
+            lockSqft();
+        }
 
         // Auto-trigger ZIP lookup to fill market rates
         if (zip) {
@@ -354,6 +359,48 @@ function toggleRatesLock() {
             }
         });
         lockRates();
+        calculate();
+    }
+}
+
+// =============================================================
+// SQFT LOCKING (set after ATTOM address lookup)
+// =============================================================
+function lockSqft() {
+    sqftLocked = true;
+    savedSqft  = document.getElementById('sqft').value;
+
+    const input = document.getElementById('sqft');
+    input.setAttribute('readonly', true);
+    document.getElementById('sqft-wrap').classList.add('locked');
+
+    const btn = document.getElementById('sqft-override-btn');
+    btn.style.display = 'inline-block';
+    btn.textContent   = '✏️ Override';
+    btn.classList.remove('unlocked');
+
+    document.getElementById('sqft-source').style.display = 'block';
+}
+
+function toggleSqftLock() {
+    const input = document.getElementById('sqft');
+    const btn   = document.getElementById('sqft-override-btn');
+
+    if (sqftLocked) {
+        sqftLocked = false;
+        input.removeAttribute('readonly');
+        document.getElementById('sqft-wrap').classList.remove('locked');
+        btn.textContent = '↩ Reset to auto';
+        btn.classList.add('unlocked');
+        document.getElementById('sqft-source').textContent = '📐 Editing manually — ATTOM value was ' + Number(savedSqft).toLocaleString() + ' sq ft';
+    } else {
+        sqftLocked = true;
+        input.value = savedSqft;
+        input.setAttribute('readonly', true);
+        document.getElementById('sqft-wrap').classList.add('locked');
+        btn.textContent = '✏️ Override';
+        btn.classList.remove('unlocked');
+        document.getElementById('sqft-source').textContent = '📐 From ATTOM property records';
         calculate();
     }
 }
