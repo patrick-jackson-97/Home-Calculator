@@ -4,15 +4,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --primary:       #1a5fa8;
-    --primary-light: #e8f0fb;
-    --primary-dark:  #0e3d6e;
-    --warning:       #e67e22;
-    --danger:        #e74c3c;
-    --text:          #1e2a3a;
-    --text-secondary:#5a6a7a;
-    --border:        #dde3eb;
-    --bg:            #f0f4f9;
+    --primary:       #059669;
+    --primary-light: #ecfdf5;
+    --primary-dark:  #047857;
+    --warning:       #d97706;
+    --danger:        #dc2626;
+    --text:          #1c2b22;
+    --text-secondary:#5a7060;
+    --border:        #d1e8db;
+    --bg:            #f0f7f3;
     --card:          #ffffff;
     --radius:        12px;
     --shadow:        0 2px 12px rgba(0,0,0,0.07);
@@ -105,6 +105,24 @@ header {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-secondary);
+}
+
+.card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.card-hero .card-icon {
+    background: rgba(255,255,255,0.15);
+    color: white;
 }
 
 .badge {

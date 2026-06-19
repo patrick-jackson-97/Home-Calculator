@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Buying Cost Calculator</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
     <header>
         <div class="header-inner">
-            <h1>Home Buying Cost Calculator</h1>
+            <h1><i class="fa-solid fa-house-chimney" style="margin-right:10px;opacity:0.9"></i>Home Buying Cost Calculator</h1>
             <p>See your true monthly cost of homeownership</p>
         </div>
     </header>
@@ -23,6 +24,7 @@
             <!-- Property Lookup -->
             <div class="card">
                 <div class="card-header">
+                    <span class="card-icon"><i class="fa-solid fa-location-dot"></i></span>
                     <h2>Property Lookup</h2>
                     <span class="badge">Optional</span>
                 </div>
@@ -59,6 +61,7 @@
             <!-- Property Details -->
             <div class="card">
                 <div class="card-header">
+                    <span class="card-icon"><i class="fa-solid fa-house"></i></span>
                     <h2>Property Details</h2>
                 </div>
 
@@ -120,6 +123,7 @@
             <!-- Market Rates -->
             <div class="card">
                 <div class="card-header">
+                    <span class="card-icon"><i class="fa-solid fa-chart-line"></i></span>
                     <h2>Market Rates</h2>
                     <span class="badge">Auto-filled by ZIP</span>
                     <button id="rates-override-btn" class="override-btn" onclick="toggleRatesLock()" style="display:none">✏️ Override</button>
@@ -310,6 +314,7 @@
             <!-- Monthly breakdown -->
             <div class="card">
                 <div class="card-header">
+                    <span class="card-icon"><i class="fa-solid fa-receipt"></i></span>
                     <h2>Monthly Breakdown</h2>
                 </div>
                 <div class="breakdown">
@@ -347,6 +352,7 @@
             <!-- Upfront costs -->
             <div class="card">
                 <div class="card-header">
+                    <span class="card-icon"><i class="fa-solid fa-wallet"></i></span>
                     <h2>Upfront Costs</h2>
                 </div>
                 <div class="breakdown">
@@ -368,6 +374,7 @@
             <!-- Full picture -->
             <div class="card card-dark">
                 <div class="card-header">
+                    <span class="card-icon"><i class="fa-solid fa-binoculars"></i></span>
                     <h2>The Full Picture</h2>
                 </div>
                 <div class="breakdown">
