@@ -519,6 +519,26 @@ function setTerm(years) {
 // =============================================================
 function calculate() {
 
+    const hasHomeValue = num('home-value') > 0;
+    const hasZip       = /^\d{5}$/.test(document.getElementById('addr-zip').value.trim());
+
+    // Hold results blank until both home value and ZIP are provided
+    if (!hasHomeValue || !hasZip) {
+        const blank = '—';
+        ['r-total','r-mortgage','r-tax','r-insurance','r-pmi','r-utilities',
+         'r-hoa','r-monthly-total','r-down','r-closing','r-cash-close',
+         'r-loan','r-interest','r-total-cost','r-agent-fee','r-transfer-tax',
+         'r-title-insurance','r-origination-fee','r-appraisal-fee',
+         'r-inspection-fee','r-recording-fee','r-other-closing','r-closing-total',
+         'closing-summary','mobile-r-total','mobile-r-mortgage',
+         'ds-total','ds-mortgage','ds-cash'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = blank;
+        });
+        document.getElementById('dp-preview').textContent = '';
+        return;
+    }
+
     const homeValue    = num('home-value');
     const sqft         = num('sqft');
     const hoa          = num('hoa');
