@@ -191,6 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
         activeTip = null;
     }
 
+    const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
     document.querySelectorAll('.tip').forEach(tipEl => {
         // Tap/click: toggle
         tipEl.addEventListener('click', e => {
@@ -198,9 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeTip === tipEl) { hideTip(); return; }
             showTip(tipEl);
         });
-        // Desktop hover
-        tipEl.addEventListener('mouseenter', () => showTip(tipEl));
-        tipEl.addEventListener('mouseleave', hideTip);
+        // Hover only on non-touch devices — on touch, mouseleave fires after
+        // tap and would immediately hide the tooltip
+        if (!isTouch) {
+            tipEl.addEventListener('mouseenter', () => showTip(tipEl));
+            tipEl.addEventListener('mouseleave', hideTip);
+        }
     });
 
     // Dismiss on tap/click outside any tip
