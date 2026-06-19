@@ -4,15 +4,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --primary:       #059669;
-    --primary-light: #ecfdf5;
-    --primary-dark:  #047857;
+    --primary:       #2e7d52;
+    --primary-light: #edf7f1;
+    --primary-dark:  #1a4d31;
     --warning:       #d97706;
     --danger:        #dc2626;
     --text:          #1c2b22;
     --text-secondary:#5a7060;
-    --border:        #d1e8db;
-    --bg:            #f0f7f3;
+    --border:        #c8e0d2;
+    --bg:            #eef5f0;
     --card:          #ffffff;
     --radius:        12px;
     --shadow:        0 2px 12px rgba(0,0,0,0.07);
@@ -30,9 +30,25 @@ body {
    HEADER
 =========================== */
 header {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    background:
+        radial-gradient(ellipse at 10% 50%, rgba(255,255,255,0.10) 0%, transparent 55%),
+        linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     color: white;
     padding: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent 0px, transparent 14px,
+        rgba(255,255,255,0.03) 14px, rgba(255,255,255,0.03) 15px
+    );
+    pointer-events: none;
 }
 
 .header-inner h1 {
@@ -81,10 +97,31 @@ header {
 .card:last-child { margin-bottom: 0; }
 
 .card-hero {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background:
+        radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.12) 0%, transparent 50%),
+        linear-gradient(150deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
     text-align: center;
     padding: 36px 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent 0px, transparent 14px,
+        rgba(255,255,255,0.03) 14px, rgba(255,255,255,0.03) 15px
+    );
+    pointer-events: none;
+}
+
+.card-hero > * {
+    position: relative;
+    z-index: 1;
 }
 
 .card-dark {
