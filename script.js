@@ -175,10 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
             left = Math.max(margin, Math.min(left, window.innerWidth - popW - margin));
 
             // Vertical: above icon; flip below if not enough room
-            let top = rect.top - popH - 10;
-            if (top < margin) top = rect.bottom + 10;
+            // position: absolute → add scrollY for document coords
+            let top = rect.top + window.scrollY - popH - 10;
+            if (rect.top - popH - 10 < margin) top = rect.bottom + window.scrollY + 10;
 
-            // position: fixed → viewport coords only, no scrollY
             tipPopup.style.left = left + 'px';
             tipPopup.style.top  = top  + 'px';
         });
@@ -213,8 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeTip && !e.target.classList.contains('tip')) hideTip();
     });
 
-    // Dismiss on scroll (mobile)
-    window.addEventListener('scroll', () => { if (activeTip) hideTip(); }, { passive: true });
 
     // Collapsible result cards — start collapsed on mobile
     const isMobile = window.matchMedia('(max-width: 820px)').matches;
