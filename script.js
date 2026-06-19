@@ -517,6 +517,10 @@ function calculate() {
 
     document.getElementById('hoa-line').style.display = hoa > 0 ? 'flex' : 'none';
 
+    // Update mobile sticky bar
+    set('mobile-r-total',    money(totalMonthly));
+    set('mobile-r-mortgage', money(monthlyMortgage));
+
     // Update results
     set('r-total',         money(totalMonthly));
     set('r-mortgage',      money(monthlyMortgage));
