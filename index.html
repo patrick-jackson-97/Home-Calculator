@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Buying Cost Calculator</title>
-    <link rel="stylesheet" href="style.css?v=11">
+    <link rel="stylesheet" href="style.css?v=12">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* ── Desktop sticky ribbon ── */
@@ -277,7 +277,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="home-value">Home Value</label>
+                    <label for="home-value">Home Value <i class="tip" data-tip="The purchase price of the home. This drives every other number in the calculator — your loan amount, taxes, insurance, and closing costs all scale from here.">i</i></label>
                     <div class="input-wrap prefix">
                         <span class="adorn">$</span>
                         <input type="text" inputmode="decimal" id="home-value" value="" placeholder="e.g. 400,000" autocomplete="off">
@@ -286,7 +286,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Down Payment</label>
+                    <label>Down Payment <i class="tip" data-tip="The upfront cash you pay toward the purchase. 20% avoids PMI and gives you a lower monthly payment. Many loans allow as little as 3–5% down, but you'll pay mortgage insurance until you reach 20% equity.">i</i></label>
                     <div class="mode-toggle">
                         <button class="mode-btn active" id="dp-pct-btn" onclick="setDPMode('pct')">%</button>
                         <button class="mode-btn" id="dp-dollar-btn" onclick="setDPMode('dollar')">$</button>
@@ -306,7 +306,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Mortgage Term</label>
+                    <label>Mortgage Term <i class="tip" data-tip="How long you have to repay the loan. A 30-year term has lower monthly payments but you pay far more in total interest. A 15-year term costs more per month but you build equity faster and pay roughly half the interest overall.">i</i></label>
                     <div class="term-toggle">
                         <button class="term-btn active" id="term-30-btn" onclick="setTerm(30)">30-Year</button>
                         <button class="term-btn" id="term-15-btn" onclick="setTerm(15)">15-Year</button>
@@ -315,7 +315,7 @@
 
                 <div class="form-group">
                     <label for="sqft">
-                        Square Footage
+                        Square Footage <i class="tip" data-tip="The interior living area of the home in square feet. Used to estimate your monthly utility costs. You can find this on the listing, county records, or use the Property Lookup above.">i</i>
                         <button id="sqft-override-btn" class="override-btn" onclick="toggleSqftLock()" style="display:none">✏️ Override</button>
                     </label>
                     <div class="input-wrap suffix" id="sqft-wrap">
@@ -328,7 +328,7 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom:0">
-                    <label for="hoa">HOA Fee</label>
+                    <label for="hoa">HOA Fee <i class="tip" data-tip="Homeowners Association fee — a monthly charge common in condos, townhomes, and planned communities. Covers shared costs like landscaping, pools, and building maintenance. Enter 0 if there's no HOA. Always ask what's included before buying.">i</i></label>
                     <div class="input-wrap prefix">
                         <span class="adorn">$</span>
                         <input type="text" inputmode="decimal" id="hoa" value="0" autocomplete="off">
@@ -350,7 +350,7 @@
 
                 <div class="form-group">
                     <label for="interest-rate">
-                        Mortgage Interest Rate
+                        Mortgage Interest Rate <i class="tip" data-tip="The annual rate your lender charges to borrow money. Even a 0.5% difference has a huge impact over 30 years — shop at least 3 lenders. Auto-filled with the current national weekly average from the Federal Reserve.">i</i>
                         <a href="https://fred.stlouisfed.org/series/MORTGAGE30US" target="_blank" class="source-link" id="rate-link">Source: FRED / Freddie Mac</a>
                     </label>
                     <div class="input-wrap suffix">
@@ -360,7 +360,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="property-tax-rate">Annual Property Tax Rate</label>
+                    <label for="property-tax-rate">Annual Property Tax Rate <i class="tip" data-tip="A tax charged by your local government each year based on your home's value. Collected monthly by most lenders through an escrow account. Auto-filled with your state average — your county rate may differ. Check your county assessor's site for the exact rate.">i</i></label>
                     <div class="input-wrap suffix">
                         <input type="number" id="property-tax-rate" value="1.23" step="0.01" min="0">
                         <span class="adorn">% of value</span>
@@ -368,7 +368,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="insurance-rate">Homeowners Insurance Rate</label>
+                    <label for="insurance-rate">Homeowners Insurance Rate <i class="tip" data-tip="Covers your home and belongings against fire, theft, storms, and liability. Required by all mortgage lenders. Paid monthly into escrow. Get quotes from multiple insurers — rates vary a lot based on location, age of home, and coverage level.">i</i></label>
                     <div class="input-wrap suffix">
                         <input type="number" id="insurance-rate" value="0.75" step="0.01" min="0">
                         <span class="adorn">% of value</span>
@@ -376,7 +376,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="utilities-rate">Utilities</label>
+                    <label for="utilities-rate">Utilities <i class="tip" data-tip="Estimated monthly cost for electricity, gas, water, and trash — expressed per square foot. Auto-filled with your state average based on EIA data. Actual costs vary by season, usage habits, and how well-insulated the home is.">i</i></label>
                     <div class="input-wrap suffix">
                         <input type="number" id="utilities-rate" value="0.187" step="0.001" min="0">
                         <span class="adorn">$/sq ft/mo</span>
@@ -539,31 +539,31 @@
                 <div class="card-body" id="body-monthly">
                     <div class="breakdown">
                         <div class="line">
-                            <span>Mortgage (Principal &amp; Interest)</span>
+                            <span>Mortgage (P&amp;I) <i class="tip" data-tip="Your fixed monthly payment to the lender — part pays down the loan balance (principal), part covers the cost of borrowing (interest). The split shifts over time: early payments are mostly interest, later ones mostly principal.">i</i></span>
                             <span id="r-mortgage">—</span>
                         </div>
                         <div class="line">
-                            <span>Property Tax</span>
+                            <span>Property Tax <i class="tip" data-tip="Your annual property tax divided by 12. Most lenders collect this monthly in an escrow account and pay the tax bill on your behalf. Your actual rate is set by your county — check your county assessor for the exact number.">i</i></span>
                             <span id="r-tax">—</span>
                         </div>
                         <div class="line">
-                            <span>Homeowners Insurance</span>
+                            <span>Homeowners Insurance <i class="tip" data-tip="Your annual insurance premium divided by 12, collected in escrow. Required by lenders. Covers the structure and your belongings against fire, theft, and certain disasters. Shop multiple insurers — rates vary significantly.">i</i></span>
                             <span id="r-insurance">—</span>
                         </div>
                         <div class="line pmi-line" id="pmi-line" style="display:none">
-                            <span>Mortgage Insurance (PMI)</span>
+                            <span>Mortgage Insurance (PMI) <i class="tip" data-tip="Required when your down payment is under 20%. Protects the lender — not you — if you stop making payments. Typically 0.5–1.5% of the loan per year. The good news: you can request removal once you've built 20% equity in your home.">i</i></span>
                             <span id="r-pmi">—</span>
                         </div>
                         <div class="line">
-                            <span>Utilities</span>
+                            <span>Utilities <i class="tip" data-tip="An estimate of monthly electricity, gas, water, and trash costs based on your home's size and state averages. This varies a lot by season and personal usage — ask the current owner or neighbors for a real-world ballpark.">i</i></span>
                             <span id="r-utilities">—</span>
                         </div>
                         <div class="line hoa-line" id="hoa-line" style="display:none">
-                            <span>HOA</span>
+                            <span>HOA <i class="tip" data-tip="Your monthly Homeowners Association fee. Before buying, ask for the full HOA financials — check the reserve fund, any pending special assessments, and what the fee covers. Some HOAs include water, trash, or exterior maintenance.">i</i></span>
                             <span id="r-hoa">—</span>
                         </div>
                         <div class="line subtotal">
-                            <span>Total Monthly</span>
+                            <span>Total Monthly <i class="tip" data-tip="The full cost of owning this home each month — mortgage, taxes, insurance, utilities, and HOA. A common guideline is to keep this under 28–30% of your gross monthly income.">i</i></span>
                             <span id="r-monthly-total">—</span>
                         </div>
                     </div>
@@ -580,15 +580,15 @@
                 <div class="card-body" id="body-upfront">
                     <div class="breakdown">
                         <div class="line">
-                            <span>Down Payment</span>
+                            <span>Down Payment <i class="tip" data-tip="The cash you pay upfront toward the purchase price. A larger down payment means a smaller loan, lower monthly payments, and no PMI if you reach 20%. Most conventional loans accept as little as 3–5% down.">i</i></span>
                             <span id="r-down">—</span>
                         </div>
                         <div class="line">
-                            <span>Closing Costs (<span id="r-closing-pct-label">3.5</span>%)</span>
+                            <span>Closing Costs (<span id="r-closing-pct-label">3.5</span>%) <i class="tip" data-tip="Fees paid at closing to complete the purchase — includes lender origination fees, title insurance, escrow setup, prepaid property taxes, and homeowners insurance. Typically 2–5% of the purchase price. Ask your lender for a Loan Estimate, which itemizes every fee.">i</i></span>
                             <span id="r-closing">—</span>
                         </div>
                         <div class="line subtotal">
-                            <span>Cash to Close</span>
+                            <span>Cash to Close <i class="tip" data-tip="The total amount of cash you'll need on closing day: your down payment plus all closing costs. This is a wire transfer or cashier's check — personal checks are not accepted. Make sure these funds are in your bank account at least a few business days before closing.">i</i></span>
                             <span id="r-cash-close">—</span>
                         </div>
                     </div>
@@ -605,15 +605,15 @@
                 <div class="card-body" id="body-fullpic">
                     <div class="breakdown">
                         <div class="line">
-                            <span>Loan Amount</span>
+                            <span>Loan Amount <i class="tip" data-tip="The amount you're borrowing from the lender — the purchase price minus your down payment. This is the balance you'll pay interest on for the life of the loan.">i</i></span>
                             <span id="r-loan">—</span>
                         </div>
                         <div class="line">
-                            <span>Total Interest Paid (<span id="r-term-label">30</span> yrs)</span>
+                            <span>Total Interest Paid (<span id="r-term-label">30</span> yrs) <i class="tip" data-tip="The total amount of interest you'll pay to the lender over the full loan term if you make every scheduled payment. Making extra principal payments or refinancing can reduce this significantly.">i</i></span>
                             <span id="r-interest">—</span>
                         </div>
                         <div class="line subtotal">
-                            <span>Total Cost of Home</span>
+                            <span>Total Cost of Home <i class="tip" data-tip="The true all-in cost of buying this home: purchase price + total interest + closing costs. This is what you'll actually pay over the full term. It's often 2–3× the purchase price — which is why buying within your means matters so much.">i</i></span>
                             <span id="r-total-cost">—</span>
                         </div>
                     </div>
@@ -624,6 +624,6 @@
 
     </main>
 
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=13"></script>
 </body>
 </html>
