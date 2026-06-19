@@ -268,19 +268,23 @@ async function handleZipLookup() {
 
 // =============================================================
 // FRED API — Live Mortgage Rate
+// FRED doesn't send CORS headers for browser requests, so we
+// route through allorigins.win (a public CORS proxy).
 // =============================================================
 async function fetchMortgageRate(years) {
     if (!FRED_API_KEY) return;
 
     const seriesId = years === 30 ? 'MORTGAGE30US' : 'MORTGAGE15US';
-    const url = `https://api.stlouisfed.org/fred/series/observations`
-              + `?series_id=${seriesId}&api_key=${FRED_API_KEY}`
-              + `&file_type=json&limit=1&sort_order=desc`;
+    const fredUrl  = `https://api.stlouisfed.org/fred/series/observations`
+                   + `?series_id=${seriesId}&api_key=${FRED_API_KEY}`
+                   + `&file_type=json&limit=1&sort_order=desc`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(fredUrl)}`;
 
     try {
-        const res  = await fetch(url);
-        const data = await res.json();
-        const rate = parseFloat(data.observations[0].value);
+        const res   = await fetch(proxyUrl);
+        const outer = await res.json();
+        const data  = JSON.parse(outer.contents);
+        const rate  = parseFloat(data.observations[0].value);
         if (!isNaN(rate)) {
             document.getElementById('interest-rate').value = rate.toFixed(2);
             savedRates['interest-rate'] = rate.toFixed(2);
