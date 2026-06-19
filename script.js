@@ -213,6 +213,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeTip && !e.target.classList.contains('tip')) hideTip();
     });
 
+    // Dismiss on scroll (mobile)
+    window.addEventListener('scroll', () => { if (activeTip) hideTip(); }, { passive: true });
+
     // Collapsible result cards — start collapsed on mobile
     const isMobile = window.matchMedia('(max-width: 820px)').matches;
     ['body-monthly', 'body-upfront', 'body-fullpic'].forEach(id => {
